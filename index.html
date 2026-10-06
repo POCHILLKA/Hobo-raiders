@@ -393,9 +393,9 @@ function playSound(type) {
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const wardCanvas = document.getElementById("wardrobe-canvas");
-const wardCtx = wardCanvas.getContext("2d");
+const wardCtx = wardCanvas ? wardCanvas.getContext("2d") : null;
 const celCanvas = document.getElementById("celeste-canvas");
-const celCtx = celCanvas.getContext("2d");
+const celCtx = celCanvas ? celCanvas.getContext("2d") : null;
 
 const GRID = 16;
 const MAP_W = 720, MAP_H = 720;
@@ -487,6 +487,45 @@ function save() {
   localStorage.setItem("hobo_wep_durability", JSON.stringify(weaponDurability));
   updateLabels();
   renderWardrobePreview();
+}
+
+function renderWardrobePreview() {
+  if (!wardCtx) return;
+  wardCtx.fillStyle = "#020305";
+  wardCtx.fillRect(0, 0, wardCanvas.width, wardCanvas.height);
+  wardCtx.fillStyle = "#38bdf8";
+  wardCtx.fillRect(35, 35, 20, 40);
+}
+
+function renderCelesteScreen() {
+  if (!celCtx) return;
+  celCtx.fillStyle = "#060912";
+  celCtx.fillRect(0, 0, celCanvas.width, celCanvas.height);
+  celCtx.fillStyle = "#f472b6";
+  celCtx.fillRect(60, 50, 35, 70);
+}
+
+function toggleCustom(type) {
+  if (type === 'type') character.type = (character.type + 1) % CHAR_TYPES.length;
+  if (type === 'top') character.top = (character.top + 1) % CHAR_TOPS.length;
+  if (type === 'bot') character.bot = (character.bot + 1) % CHAR_BOTS.length;
+  save();
+}
+
+function openCustomizer() {
+  document.getElementById("overlay").style.display = "none";
+  document.getElementById("custom-overlay").style.display = "flex";
+  renderWardrobePreview();
+}
+
+function closeCustomizer() {
+  document.getElementById("custom-overlay").style.display = "none";
+  save();
+  document.getElementById("overlay").style.display = "flex";
+}
+
+function hit(a, b) {
+  return (a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y);
 }
 
 function updateLabels() {
@@ -2816,4 +2855,56 @@ if (btnC) {
   btnC.addEventListener("touchstart", (e) => { e.preventDefault(); performDash(); }, { passive: false });
   btnC.addEventListener("mousedown", (e) => { e.preventDefault(); performDash(); });
 }
-const btnGadget = document.getElementById("btn-
+const btnGadget = document.getElementById("btn-gadget-action");
+if (btnGadget) {
+  btnGadget.addEventListener("touchstart", (e) => { e.preventDefault(); useGadget(); }, { passive: false });
+  btnGadget.addEventListener("mousedown", (e) => { e.preventDefault(); useGadget(); });
+}
+if (canvas) {
+  canvas.addEventListener("click", onActionPress);
+}
+
+window.addEventListener("keydown", (e) => {
+  initAudio();
+  if (e.key === "ArrowUp" || e.key === "w") keys.up = true;
+  if (e.key === "ArrowDown" || e.key === "s") keys.down = true;
+  if (e.key === "ArrowLeft" || e.key === "a") keys.left = true;
+  if (e.key === "ArrowRight" || e.key === "d") keys.right = true;
+  if (e.key === " ") onActionPress();
+  if (e.key === "q") switchWeapon();
+  if (e.key === "Shift") performDash();
+  if (e.key === "e") useGadget();
+
+  let kx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+  let ky = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
+  if (kx !== 0 || ky !== 0) {
+    let kl = Math.hypot(kx, ky);
+    moveVec.x = kx / kl;
+    moveVec.y = ky / kl;
+  } else {
+    moveVec = { x: 0, y: 0 };
+  }
+});
+
+window.addEventListener("keyup", (e) => {
+  if (e.key === "ArrowUp" || e.key === "w") keys.up = false;
+  if (e.key === "ArrowDown" || e.key === "s") keys.down = false;
+  if (e.key === "ArrowLeft" || e.key === "a") keys.left = false;
+  if (e.key === "ArrowRight" || e.key === "d") keys.right = false;
+
+  let kx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+  let ky = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
+  if (kx !== 0 || ky !== 0) {
+    let kl = Math.hypot(kx, ky);
+    moveVec.x = kx / kl;
+    moveVec.y = ky / kl;
+  } else {
+    moveVec = { x: 0, y: 0 };
+  }
+});
+
+save();
+loop();
+</script>
+</body>
+</html>
