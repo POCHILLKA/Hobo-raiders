@@ -592,7 +592,6 @@ function updateLabels() {
 }
 
 function buy(type) {
-  initAudio();
   if (type === 'dmg' && stash >= 6) { stash -= 6; upgrades.dmg += 8; playSound('loot'); }
   if (type === 'hp' && stash >= 6) { stash -= 6; upgrades.hp += 30; playSound('loot'); }
   if (type === 'bag' && stash >= 10 && upgrades.bagLvl < 3) { stash -= 10; upgrades.bagLvl++; playSound('loot'); }
@@ -616,7 +615,6 @@ function closeArmory() {
 }
 
 function toggleEquipWeapon(wepId) {
-  initAudio();
   let idx = equippedWeapons.indexOf(wepId);
   if (idx !== -1) {
     if (equippedWeapons.length > 1) {
@@ -633,7 +631,6 @@ function toggleEquipWeapon(wepId) {
 }
 
 function sellStoredWeapon(wepId) {
-  initAudio();
   if (storedWeapons.length <= 1) return;
   let wep = ALL_WEAPONS[wepId];
   if (!wep) return;
@@ -793,7 +790,6 @@ const DEATH_QUOTES = [
 ];
 let currentQuote = "";
 
-// Принудительно запускаем сразу с меню бункера, минуя багнутую заставку
 let gameState = "overlay";
 let tick = 0, raidTimer = 0, screenShake = 0;
 let mapBannerTimer = 0;
@@ -1240,7 +1236,7 @@ function lineOfSight(x1, y1, x2, y2) {
     let px = x1 + (x2 - x1) * (s / steps);
     let py = y1 + (y2 - y1) * (s / steps);
     let pBox = { x: px, y: py, w: 2, h: 2 };
-    if (obstacles.some(o => hit(pBox, o)) || placedBarricades.some(b => hit(b, b))) return false;
+    if (obstacles.some(o => hit(pBox, o)) || placedBarricades.some(b => hit(pBox, b))) return false;
   }
   return true;
 }
@@ -2606,7 +2602,7 @@ if (touchBase) {
 
   touchBase.addEventListener("mousedown", onStart);
   window.addEventListener("mousemove", onMove);
-  window.addEventListener("mouseup", onEnd);
+  window.mouseup = onEnd;
 }
 
 const btnA = document.getElementById("btn-a");
@@ -2657,7 +2653,8 @@ window.addEventListener("keydown", (e) => {
 
 window.addEventListener("keyup", (e) => {
   if (e.key === "ArrowUp" || e.key === "w") keys.up = false;
-  if (e.key === "ArrowDown" || e.key === "s") keys.down = false;
+  if (e.key === "ArrowDown" || e.key === "s") keys
+.down = false;
   if (e.key === "ArrowLeft" || e.key === "a") keys.left = false;
   if (e.key === "ArrowRight" || e.key === "d") keys.right = false;
 
