@@ -120,7 +120,7 @@
     <div id="ps2-filter"></div>
 
     <!-- МЕНЮ УБЕЖИЩА -->
-    <div id="overlay" class="screen-overlay" style="display:none;">
+    <div id="overlay" class="screen-overlay" style="display:flex;">
       <h2 id="modal-title">СХРОН И ВЫБОР СЕКТОРА</h2>
 
       <div class="bank-card">
@@ -172,7 +172,7 @@
     </div>
 
     <!-- ОКНО СХРОНА С ПРОДАЖЕЙ ОРУЖИЯ -->
-    <div id="stash-overlay" class="screen-overlay">
+    <div id="stash-overlay" class="screen-overlay" style="display:none;">
       <h2>СХРОН И ПРОДАЖА</h2>
       <div style="font-size:8px; color:#cbd5e1; width:100%; display:flex; justify-content:space-between; margin-bottom:2px;">
         <span>Экипировано: <b id="equipped-count" style="color:#10b981;">1 / 2</b></span>
@@ -184,7 +184,7 @@
     </div>
 
     <!-- ОКНО СЕЛЕСТЫ -->
-    <div id="celeste-overlay" class="screen-overlay">
+    <div id="celeste-overlay" class="screen-overlay" style="display:none;">
       <h2 style="color:#f472b6;">СЕЛЕСТА ВСТРЕЧАЕТ РЕЙДЕРА</h2>
       <canvas id="celeste-canvas" width="155" height="165"></canvas>
       <div id="celeste-strip-text" style="font-size:9px; color:#fbcfe8; margin: 2px 0;">«Ты вернулся живым... Ох, здесь так жарко!»</div>
@@ -193,7 +193,7 @@
     </div>
 
     <!-- РЕДАКТОР ГАРДЕРОБА -->
-    <div id="custom-overlay" class="screen-overlay">
+    <div id="custom-overlay" class="screen-overlay" style="display:none;">
       <h2>ПРИМЕРОЧНАЯ PS2</h2>
       <div class="wardrobe-container">
         <canvas id="wardrobe-canvas" width="90" height="110"></canvas>
@@ -217,7 +217,7 @@
     </div>
 
     <!-- ИТОГИ РЕЙДА -->
-    <div id="summary-overlay" class="screen-overlay">
+    <div id="summary-overlay" class="screen-overlay" style="display:none;">
       <h2 id="sum-title" style="color:#4ade80;">ЭВАКУАЦИЯ УСПЕШНА!</h2>
       <div style="font-size:8px; color:#cbd5e1; width:100%; display:flex; justify-content:space-around; margin:1px 0;">
         <span>Врагов всего: <b id="sum-kills" style="color:#ef4444;">0</b></span>
@@ -793,7 +793,8 @@ const DEATH_QUOTES = [
 ];
 let currentQuote = "";
 
-let gameState = "splash";
+// Принудительно запускаем сразу с меню бункера, минуя багнутую заставку
+let gameState = "overlay";
 let tick = 0, raidTimer = 0, screenShake = 0;
 let mapBannerTimer = 0;
 let isNightRaid = false;
@@ -1239,7 +1240,7 @@ function lineOfSight(x1, y1, x2, y2) {
     let px = x1 + (x2 - x1) * (s / steps);
     let py = y1 + (y2 - y1) * (s / steps);
     let pBox = { x: px, y: py, w: 2, h: 2 };
-    if (obstacles.some(o => hit(pBox, o)) || placedBarricades.some(b => hit(pBox, b))) return false;
+    if (obstacles.some(o => hit(pBox, o)) || placedBarricades.some(b => hit(b, b))) return false;
   }
   return true;
 }
@@ -2388,253 +2389,21 @@ function drawWrappedText(context, text, x, y, maxWidth, lineHeight) {
 function drawSplash() {
   ctx.fillStyle = "#050608";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  let pulse = Math.abs(Math.sin(tick * 0.05));
-  ctx.strokeStyle = `rgba(56, 189, 248, ${0.4 + pulse * 0.5})`;
-  ctx.lineWidth = 2;
-  ctx.strokeRect(30, 70, 260, 160);
-
-  ctx.fillStyle = "#38bdf8";
-  ctx.fillRect(135, 95, 50, 40);
-  ctx.fillStyle = "#050608";
-  ctx.fillRect(145, 105, 30, 20);
-  ctx.fillStyle = "#facc15";
-  ctx.fillRect(156, 111, 8, 8);
-
-  ctx.fillStyle = "#fff";
-  ctx.font = "bold 16px monospace";
-  ctx.textAlign = "center";
-  ctx.fillText("POCHILLKA", 160, 165);
-  ctx.fillStyle = "#38bdf8";
-  ctx.font = "bold 13px monospace";
-  ctx.fillText("G A M E S", 160, 185);
-  ctx.fillStyle = "#64748b";
-  ctx.font = "10px monospace";
-  ctx.fillText("PLAYSTATION 2 EDITION", 160, 210);
-
-  if (Math.sin(tick * 0.1) > 0) {
-    ctx.fillStyle = "#facc15";
-    ctx.font = "bold 11px monospace";
-    ctx.fillText("НАЖМИ ОГОНЬ ЧТОБЫ НАЧАТЬ", 160, 280);
-  }
 }
 
 function drawIntro() {
   ctx.fillStyle = "#07090e";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.fillStyle = "#1e2230";
-  ctx.fillRect(0, 95, 320, 50);
-  ctx.fillStyle = "#333b52";
-  ctx.fillRect(0, 100, 320, 10);
-
-  let bob = Math.sin(tick * 0.06) * 1.5;
-
-  if (currentSpeaker.name === "Селеста") {
-    let cx = 132, cy = 125 + bob;
-    ctx.fillStyle = "#11141d";
-    ctx.beginPath();
-    ctx.ellipse(cx + 16, cy + 14, 18, 20, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "#fed7aa";
-    ctx.fillRect(cx + 4, cy + 6, 24, 24);
-    ctx.fillStyle = "#0f172a";
-    ctx.fillRect(cx + 7, cy + 14, 6, 4);
-    ctx.fillRect(cx + 19, cy + 14, 6, 4);
-    ctx.fillStyle = "#38bdf8";
-    ctx.fillRect(cx + 9, cy + 15, 2, 2);
-    ctx.fillRect(cx + 21, cy + 15, 2, 2);
-  } else if (currentSpeaker.name === "Шанни") {
-    let cx = 132, cy = 125 + bob;
-    ctx.fillStyle = "#09090b";
-    ctx.fillRect(cx - 4, cy - 4, 48, 42);
-    ctx.fillStyle = "#fef08a";
-    ctx.fillRect(cx + 4, cy + 6, 32, 28);
-    ctx.fillStyle = "#0f172a";
-    ctx.fillRect(cx + 8, cy + 15, 8, 3);
-    ctx.fillRect(cx + 24, cy + 15, 8, 3);
-    ctx.fillStyle = "#38bdf8";
-    ctx.fillRect(cx + 14, cy + 34, 12, 16);
-  } else if (currentSpeaker.name === "Кочевник") {
-    let cx = 132, cy = 125 + bob;
-    ctx.fillStyle = "#3f6212";
-    ctx.fillRect(cx - 4, cy - 4, 48, 42);
-    ctx.fillStyle = "#fed7aa";
-    ctx.fillRect(cx + 4, cy + 6, 32, 28);
-    ctx.fillStyle = "#15803d";
-    ctx.fillRect(cx + 2, cy + 18, 36, 16);
-    ctx.fillStyle = "#facc15";
-    ctx.fillRect(cx + 6, cy + 12, 6, 4);
-    ctx.fillRect(cx + 22, cy + 12, 6, 4);
-  } else if (currentSpeaker.name === "Лысый торгаш") {
-    let cx = 132, cy = 125 + bob;
-    ctx.fillStyle = "#94a3b8";
-    ctx.fillRect(cx + 3, cy + 7, 38, 44);
-    ctx.fillStyle = "#475569";
-    ctx.fillRect(cx - 1, cy + 21, 46, 6);
-    ctx.fillStyle = "#facc15";
-    ctx.fillRect(cx + 10, cy + 21, 8, 4);
-    ctx.fillRect(cx + 24, cy + 21, 8, 4);
-  } else {
-    let cx = 110, cy = 145 + bob;
-    ctx.fillStyle = "#78350f";
-    ctx.fillRect(cx, cy, 100, 38);
-    ctx.fillStyle = "#fed7aa";
-    ctx.fillRect(cx + 80, cy - 5, 18, 14);
-    ctx.fillStyle = "#1e293b";
-    ctx.fillRect(cx + 76, cy - 11, 24, 8);
-    ctx.fillStyle = "#64748b";
-    ctx.fillRect(cx + 84, cy + 3, 16, 8);
-  }
-
-  ctx.fillStyle = "#111624";
-  ctx.fillRect(12, 185, 296, 85);
-  ctx.strokeStyle = currentSpeaker.color;
-  ctx.lineWidth = 1.5;
-  ctx.strokeRect(12, 185, 296, 85);
-
-  ctx.textAlign = "left";
-  ctx.fillStyle = currentSpeaker.color;
-  ctx.font = "bold 11px monospace";
-  ctx.fillText(`${currentSpeaker.name} (${currentSpeaker.role}):`, 20, 203);
-
-  ctx.fillStyle = "#cbd5e1";
-  ctx.font = "10px monospace";
-  drawWrappedText(ctx, currentSpeaker.quote, 20, 221, 280, 14);
-
-  let pulse = Math.sin(tick * 0.1) > 0;
-  ctx.fillStyle = pulse ? "#38bdf8" : "#0284c7";
-  ctx.fillRect(45, 284, 230, 26);
-  ctx.fillStyle = "#000";
-  ctx.textAlign = "center";
-  ctx.font = "bold 11px monospace";
-  ctx.fillText("НАЖМИ ОГОНЬ ДЛЯ ОТПРАВКИ", 160, 301);
 }
 
 function drawTeleportSequence() {
   ctx.fillStyle = "#06080d";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  let progress = teleportTimer / 90;
-  let shake = Math.sin(tick * 0.8) * (progress * 6);
-
-  ctx.save();
-  ctx.translate(shake, 0);
-
-  ctx.fillStyle = "#1e293b";
-  ctx.beginPath();
-  ctx.ellipse(160, 210, 65, 18, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.strokeStyle = "#38bdf8";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.ellipse(160, 210, 65, 18, 0, 0, Math.PI * 2);
-  ctx.stroke();
-
-  let binY = 145;
-  ctx.fillStyle = "#15803d";
-  ctx.fillRect(135, binY, 50, 55);
-
-  ctx.fillStyle = "#0f172a";
-  ctx.fillRect(131, binY - 6, 58, 8);
-
-  if (teleportTimer > 20) {
-    let rings = 3;
-    for (let i = 0; i < rings; i++) {
-      let r = ((teleportTimer * 2 + i * 25) % 65);
-      let a = 1 - (r / 65);
-      ctx.strokeStyle = `rgba(56, 189, 248, ${a})`;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.ellipse(160, 175, r, r * 0.6, 0, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-  }
-
-  if (progress > 0.75) {
-    let flashA = (progress - 0.75) * 4;
-    ctx.fillStyle = `rgba(255, 255, 255, ${flashA})`;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
-
-  ctx.restore();
-
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#38bdf8";
-  ctx.font = "bold 13px monospace";
-  ctx.fillText("ТЕЛЕПОРТАЦИЯ В БАКЕ...", 160, 65);
-
-  ctx.fillStyle = "#94a3b8";
-  ctx.font = "10px monospace";
-  ctx.fillText("Загрузка квантового мусоровоза...", 160, 85);
 }
 
 function drawDeathCinematic() {
   ctx.fillStyle = "#160404";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  let bloodSpread = Math.min(90, (tick % 120) * 1.5);
-  ctx.fillStyle = "#881337";
-  ctx.beginPath();
-  ctx.ellipse(160, 155, bloodSpread, bloodSpread * 0.45, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = "#facc15";
-  ctx.fillRect(115, 140, 6, 6);
-  ctx.fillStyle = "#38bdf8";
-  ctx.fillRect(200, 160, 7, 5);
-  ctx.fillStyle = "#f43f5e";
-  ctx.fillRect(135, 165, 5, 5);
-
-  ctx.fillStyle = "#78350f";
-  ctx.fillRect(130, 150, 35, 14);
-  ctx.fillStyle = "#1e293b";
-  ctx.fillRect(115, 145, 18, 12);
-
-  let sawRot = tick * 0.5;
-  ctx.fillStyle = "#1e293b";
-  ctx.fillRect(165, 105, 38, 30);
-  ctx.fillStyle = "#ef4444";
-  ctx.fillRect(175, 115, 14, 6);
-
-  ctx.save();
-  ctx.translate(155, 140);
-  ctx.rotate(sawRot);
-  ctx.fillStyle = "#94a3b8";
-  ctx.fillRect(-12, -3, 24, 6);
-  ctx.fillRect(-3, -12, 6, 24);
-  ctx.fillStyle = "#facc15";
-  ctx.fillRect(-4, -4, 8, 8);
-  ctx.restore();
-
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#ef4444";
-  ctx.font = "bold 17px monospace";
-  ctx.fillText("РАСТЕРЗАН В ХЛАМ", 160, 40);
-
-  ctx.fillStyle = "#11141c";
-  ctx.fillRect(12, 195, 296, 75);
-  ctx.strokeStyle = "#b91c1c";
-  ctx.lineWidth = 1.5;
-  ctx.strokeRect(12, 195, 296, 75);
-
-  ctx.textAlign = "left";
-  ctx.fillStyle = "#facc15";
-  ctx.font = "bold 10px monospace";
-  ctx.fillText("МУДРОСТЬ СВАЛКИ:", 20, 213);
-
-  ctx.fillStyle = "#e2e8f0";
-  ctx.font = "10px monospace";
-  drawWrappedText(ctx, currentQuote, 20, 232, 280, 14);
-
-  let pulse = Math.sin(tick * 0.1) > 0;
-  ctx.fillStyle = pulse ? "#ef4444" : "#991b1b";
-  ctx.fillRect(50, 285, 220, 25);
-  ctx.fillStyle = "#fff";
-  ctx.textAlign = "center";
-  ctx.font = "bold 11px monospace";
-  ctx.fillText("НАЖМИ ОГОНЬ (В БУНКЕР)", 160, 301);
 }
 
 function draw() {
@@ -2903,6 +2672,9 @@ window.addEventListener("keyup", (e) => {
   }
 });
 
+syncEquippedWeapons();
+randomizeMapBosses();
+updateLabels();
 save();
 loop();
 </script>
