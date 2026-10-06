@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Hobo Raiders</title>
+  <!-- Подключаем Telegram Web App API -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     button, .btn, [onclick], canvas { pointer-events: auto !important; touch-action: manipulation; }
     
@@ -257,6 +259,14 @@
   </div>
 
 <script>
+// Автоматическая инициализация Telegram Web App
+window.addEventListener('DOMContentLoaded', () => {
+  if (window.Telegram && window.Telegram.WebApp) {
+    window.Telegram.WebApp.ready();
+    window.Telegram.WebApp.expand();
+  }
+});
+
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let actx = null, musicStep = 0, musicInterval = null;
 
@@ -1236,7 +1246,7 @@ function lineOfSight(x1, y1, x2, y2) {
     let px = x1 + (x2 - x1) * (s / steps);
     let py = y1 + (y2 - y1) * (s / steps);
     let pBox = { x: px, y: py, w: 2, h: 2 };
-    if (obstacles.some(o => hit(pBox, o)) || placedBarricades.some(b => hit(pBox, b))) return false;
+    if (obstacles.some(o => hit(pBox, o)) || placedBarricades.some(b => hit(b, b))) return false;
   }
   return true;
 }
@@ -2602,7 +2612,7 @@ if (touchBase) {
 
   touchBase.addEventListener("mousedown", onStart);
   window.addEventListener("mousemove", onMove);
-  window.mouseup = onEnd;
+  window.addEventListener("mouseup", onEnd);
 }
 
 const btnA = document.getElementById("btn-a");
@@ -2653,8 +2663,7 @@ window.addEventListener("keydown", (e) => {
 
 window.addEventListener("keyup", (e) => {
   if (e.key === "ArrowUp" || e.key === "w") keys.up = false;
-  if (e.key === "ArrowDown" || e.key === "s") keys
-.down = false;
+  if (e.key === "ArrowDown" || e.key === "s") keys.down = false;
   if (e.key === "ArrowLeft" || e.key === "a") keys.left = false;
   if (e.key === "ArrowRight" || e.key === "d") keys.right = false;
 
