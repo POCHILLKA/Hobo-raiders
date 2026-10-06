@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Hobo Raiders</title>
-  <!-- Подключаем Telegram Web App API -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     button, .btn, [onclick], canvas { pointer-events: auto !important; touch-action: manipulation; }
@@ -259,7 +258,6 @@
   </div>
 
 <script>
-// Автоматическая инициализация Telegram Web App
 window.addEventListener('DOMContentLoaded', () => {
   if (window.Telegram && window.Telegram.WebApp) {
     window.Telegram.WebApp.ready();
@@ -781,15 +779,6 @@ function renderMapSelector() {
   });
 }
 
-const INTRO_SPEAKERS = [
-  { name: "Селеста", role: "напарница", color: "#f472b6", quote: "«Только шапку не забудь! А то мозги простудишь быстрее роботов.»" },
-  { name: "Шанни", role: "азиатка-инженер", color: "#38bdf8", quote: "«Смотря какой фабрик, смотря какой деталс...»" },
-  { name: "Кочевник", role: "воин пустошей", color: "#4ade80", quote: "«Победи там всех! Ядро тебе в зад.»" },
-  { name: "Лысый торгаш", role: "робот-барыга", quote: "«Если сдохнешь, не замарай штаны... А то перепродать сложнее!»", color: "#fb923c" },
-  { name: "Николаич", role: "рейдер", quote: "«Голова чугунная... Но на свалке шевеление. Пора набивать рюкзак!»", color: "#facc15" }
-];
-let currentSpeaker = INTRO_SPEAKERS[0];
-
 const DEATH_QUOTES = [
   "«Ну ты лох, так тебе и надо, штаны не замарал?»",
   "«Одним петухом меньше, одним больше..»",
@@ -1056,17 +1045,10 @@ function generateWorld() {
   }
 }
 
+// Исправление: кнопка "В РЕЙД" сразу запускает игру без зависаний
 function openIntro() {
-  const overlay = document.getElementById("overlay");
-  if (overlay) overlay.style.display = "none";
-  currentSpeaker = INTRO_SPEAKERS[Math.floor(Math.random() * INTRO_SPEAKERS.length)];
-  gameState = "intro";
-}
-
-function startTeleportSequence() {
-  gameState = "teleport";
-  teleportTimer = 0;
-  playSound('teleport');
+  initAudio();
+  startRaid();
 }
 
 function startRaid() {
